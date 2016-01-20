@@ -10,13 +10,13 @@ var fs = require('fs'),
     config = require('./config.js');
 
 /* Connect to your database */
-mongoose.connect('mongodb://egs104:brandy@ds047075.mongolab.com:47075/ericryandb');
+var MongoClient = require('mongodb').MongoClient;
 
-// MongoClient.connect('mongodb://egs104:brandy@ds047075.mongolab.com:47075/ericryandb', function(err, db){
-//
-//   if (err) throw err;
-//
-// });
+mongoose.connect('mongodb://egs104:group6a@ds047075.mongolab.com:47075/ericryandb', function(err, db){
+
+  if (err) throw err;
+
+});
 
 
 /*
@@ -24,11 +24,43 @@ mongoose.connect('mongodb://egs104:brandy@ds047075.mongolab.com:47075/ericryandb
   and then save it to your Mongo database
  */
 
-var newListing = Listing({
+ fs.readFile('listings.json', 'utf8', function(err, data) {
+   var listingsData = JSON.parse(data);
+   console.log(listingsData["entries"].length);
+    for (var i = 0; i < listingsData["entries"].length; i++)
+    {
+        var newListing = new Listing();
+        newListing.code = listingsData["entries"][i].code;
+        newListing.name = listingsData["entries"][i].name;
 
+        if (listingsData["entries"][i]["coordinates"]){
+          newListing.coordinates.latitude = listingsData["entries"][i]["coordinates"].latitude;
+          newListing.coordinates.longitude = listingsData["entries"][i]["coordinates"].longitude;
+        }
+        if (listingsData["entries"][i]["address"]){
+          newListing.address = listingsData["entries"][i].address;
+        }
 
+        console.log(newListing);
 
-})
+        newListing.save(function(err) {
+          if (err) {
+            throw err;
+          }
+          else {
+            console.log('Listing created!')
+          };
+        });
+    }
+        console.log("Done");
+ });
+
+// save the listing
+// newListing.save(function(err) {
+//   if (err) throw err;
+//
+//   console.log('Listing created!');
+// });
 
 
 /*
